@@ -32,7 +32,7 @@ print("=" * 50)
 # --- bayes() ---
 # P(A|B) where A=0.3, B=0.5, P(B|A)=0.8
 print("\n-- bayes() --")
-bayes(A=0.3, B=0.5, B_given_A=0.8)
+bayes(A=0.3, B=0.78, B_given_A=0.6)
 
 # --- check_rank() ---
 print("\n-- check_rank() --")
@@ -43,7 +43,7 @@ check_rank(X)
 
 # --- is_invertible() ---
 print("\n-- is_invertible() --")
-A = np.array([[1, 2],
+A = np.array([[1, 1],
               [3, 4]])
 is_invertible(A)
 
@@ -59,39 +59,49 @@ print("\n" + "=" * 50)
 print("CHAPTER 6")
 print("=" * 50)
 
-# Shared training data
-X_train = np.array([[1, 0, 1],
-                    [2, -1, 1],
-                    [1, 1, 5]])
-y_train = np.array([1, 2, 3])
-X_test  = np.array([[-1, 2, 8],
-                    [1, 5, -1]])
+# X_train_raw = np.array([[-10], [-8], [-3], [-1], [2], [8]])
+X_train_raw = np.array([[1, 0, 1], [1, -1, 1]])
 
-# --- mean_squared_error() ---
-print("\n-- mean_squared_error() --")
-mean_squared_error(X_train, y_train)
-
-# --- add_bias() ---
-print("\n-- add_bias() --")
-X_biased = add_bias(X_train)
-print("X with bias column:\n", X_biased)
+y_train = np.array([0, 1])
+# X_test_raw = np.array([[9]])
+X_test_raw = np.array([[1, 0, 1], [1, -1, 1]])
 
 # --- make_poly() ---
 print("\n-- make_poly() --")
-X_1d = np.array([[1], [2], [3], [4]])
-X_poly = make_poly(X_1d, order=2)
-print("Polynomial features (order 2):\n", X_poly)
+X_poly_train = make_poly(X_train_raw, order=3)
+X_poly_test  = make_poly(X_test_raw, order=3)
+print("Polynomial features (order 3):\n", X_poly_train)
 
-# --- least_squares_prime() ---
+
+# --- mean_squared_error() ---
+print("\n-- mean_squared_error() --")
+mean_squared_error(add_bias(X_train_raw), y_train)
+
+# --- add_bias() ---
+print("\n-- add_bias() --")
+X_biased = add_bias(X_train_raw)
+print("X with bias column:\n", X_biased)
+
+# --- least_squares_prime() WITH BIAS ---
 print("\n-- least_squares_prime() WITH BIAS --")
-least_squares_prime(X_biased, y_train, add_bias(X_test))
+least_squares_prime(X_biased, y_train, add_bias(X_test_raw))
+
+# --- least_squares_prime() WITHOUT BIAS ---
 print("\n-- least_squares_prime() WITHOUT BIAS --")
-least_squares_prime(X_train, y_train, X_test)
+least_squares_prime(X_train_raw, y_train, X_test_raw)
+
+# --- least_squares_prime() POLYNOMIAL  ---
+print("\n-- least_squares_prime() POLYNOMIAL--")
+least_squares_prime(X_poly_train, y_train, X_poly_test)
+
+# --- ridge_reg() ---
+print("\n-- ridge_reg() --")
+ridge_reg(X_biased, y_train, reg_factor=0.1, Xt=add_bias(X_test_raw))
 
 # --- binary_classif() ---
 print("\n-- binary_classif() --")
-y_binary = np.array([-1, -1, 1, 1])
-binary_classif(X_biased, y_binary, add_bias(X_test))
+y_binary = np.array([-1, 1])
+binary_classif(X_biased, y_binary, add_bias(X_test_raw))
 
 # --- multi_category_classif() ---
 print("\n-- multi_category_classif() --")
@@ -102,9 +112,6 @@ X_mc_b = add_bias(X_mc)
 X_test_mc = add_bias(np.array([[1, 0], [0, 1]]))
 multi_category_classif(X_mc_b, y_mc, X_test_mc)
 
-# --- ridge_reg() ---
-print("\n-- ridge_reg() --")
-ridge_reg(X_biased, y_train, reg_factor=0.1, Xt=add_bias(X_test))
 
 
 # ===========================================================

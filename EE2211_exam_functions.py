@@ -121,7 +121,9 @@ def make_poly(X, order):
     return poly.fit_transform(X)
 
 def least_squares_prime(X, y, Xt):
-    """Predict a value of y using least squares regression.  
+    """Predict a value of y using least squares regression.
+    Handles overdetermined (m > d), exactly determined (m == d),
+    and underdetermined (m < d) systems automatically.
     
     :param  
     X: a matrix X  
@@ -130,8 +132,17 @@ def least_squares_prime(X, y, Xt):
     :return  
     y_out: the predicted y values    
     """ 
-    # calculate w
-    w = inv(X.T @ X) @ X.T @ y
+    m, d = X.shape
+
+    if m >= d:
+        # Overdetermined / exactly determined: normal equation
+        print("Using normal equation (m >= d) --> Overdetermined or exactly determined system")
+        w = inv(X.T @ X) @ X.T @ y
+    else:
+        # Underdetermined: minimum norm solution via pseudoinverse
+        print("Using pseudoinverse (m < d) --> Underdetermined system")
+        w = X.T @ inv(X @ X.T) @ y
+
     print(f"w is: {w}")
 
     # predict 
@@ -149,9 +160,15 @@ def binary_classif(X, y, Xt):
     :return  
     y_out: the predicted y values as -1 or 1    
     """
-    w = inv(X.T @ X) @ X.T @ y
+    m, d = X.shape
+
+    # Apply the same safety check you used in least squares!
+    if m >= d:
+        w = inv(X.T @ X) @ X.T @ y
+    else:
+        w = X.T @ inv(X @ X.T) @ y
+        
     y_predict = Xt @ w
-    #y_class_predict = np.sign(y_predict)
     y_class_predict = [[1 if x >= 0 else -1] for x in y_predict]
     print(f"Predicted y class: {y_class_predict}")
     return y_class_predict
@@ -168,7 +185,7 @@ def multi_category_classif(X, y, Xt):
     y_out: the predicted y values in a one-hot matrix 
     """
     # one hot encode, find W
-    encoder = OneHotEncoder(sparse=False)
+    encoder = OneHotEncoder(sparse_output=False)
     Ytr = encoder.fit_transform(y)
     W = inv(X.T @ X) @ X.T @ Ytr
     print(f"W is: {W}")
@@ -196,14 +213,16 @@ def ridge_reg(X, y, reg_factor, Xt):
         # primal (m > d)
         reg_L = reg_factor*np.identity(X.shape[1])
         w = inv(X.T @ X + reg_L) @ X.T @ y
+        print("We are using Primal Form (m > d)\n")
     else:
         # dual (m <= d)
         reg_L = reg_factor*np.identity(X.shape[0])
         w = X.T @ inv(X @ X.T + reg_L) @ y
+        print("We are using Dual Form (m <= d)\n")
     
     # predict y
     yt = Xt @ w
-    print(f"predicted y is: {yt}")
+    print(f"Predicted y is: {yt}")
     return yt
        
 """----------Chapter 7----------
