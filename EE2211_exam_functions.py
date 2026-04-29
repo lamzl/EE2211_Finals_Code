@@ -233,42 +233,31 @@ def ridge_reg(X, y, reg_factor, Xt):
 """
 
 def pearsons(x, y):
-    """
-    Calculate Pearson's correlation coefficient between two arrays.
-
-    :param  
-    x: array-like, feature values  
-    y: array-like, target values  
-    :return  
-    r: Pearson's correlation coefficient
-
-    Example arrays:
-    x = [1, 2, 3, 4, 5]
-    y = [2, 4, 6, 8, 10]
-    """
-    # Ensure inputs are numpy arrays
     x = np.array(x)
-    y = np.array(y)
+    y = np.array(y).flatten()  # ensure y is 1D
 
-    # Compute means
-    mean_x = np.mean(x)
-    mean_y = np.mean(y)
+    results = []
 
-    # Compute numerator (covariance)
-    covariance = np.sum((x - mean_x) * (y - mean_y))
+    for i in range(x.shape[1]):  # loop through each feature column
+        xi = x[:, i]
 
-    # Compute denominator (product of standard deviations)
-    std_x = np.sqrt(np.sum((x - mean_x) ** 2))
-    std_y = np.sqrt(np.sum((y - mean_y) ** 2))
-    denominator = std_x * std_y
+        mean_x = np.mean(xi)
+        mean_y = np.mean(y)
 
-    # Avoid division by zero
-    if denominator == 0:
-        raise ValueError("Division by zero: standard deviation of x or y is zero.")
+        covariance = np.sum((xi - mean_x) * (y - mean_y))
 
-    # Pearson's correlation coefficient
-    r = covariance / denominator
-    return r
+        std_x = np.sqrt(np.sum((xi - mean_x) ** 2))
+        std_y = np.sqrt(np.sum((y - mean_y) ** 2))
+
+        denominator = std_x * std_y
+
+        if denominator == 0:
+            raise ValueError("Division by zero in feature {}".format(i+1))
+
+        r = covariance / denominator
+        results.append(r)
+
+    return results
 
 def bias_squared(y_true, y_predictions):
     """
@@ -296,6 +285,8 @@ def variance(y_predictions):
     y_mean = np.mean(y_predictions)  # Mean of predictions
     var = np.mean((y_predictions - y_mean) ** 2)
     return var
+
+
 
 """----------Chapter 8----------
 
@@ -327,6 +318,7 @@ def grad_descent(x, eta, iterations, function, grad):
     print("Function results are: ", f_out)
     return x_out, f_out
 
+
 def grad_descent_2(x, y, eta, iterations, function, grad_x, grad_y):
     """ Returns arrays of x and f(x) after specified number of iterations
         #NOTE: when the gradient has the other variable, we just use the original value for the gradient calculation,
@@ -338,8 +330,8 @@ def grad_descent_2(x, y, eta, iterations, function, grad_x, grad_y):
         eta (float): the learning rate value
         iterations (int): the number of iterations
         function (function): the defined function for f(x, y)
-        grad_x (function): the defined function for grad w.r.t x, i.e. f'_x(x)
-        grad_y (function): the defined function for grad w.r.t y, i.e. f'_y(y)
+        grad_x (function): the defined function for grad w.r.t x, i.e. f'_x(x, y)
+        grad_y (function): the defined function for grad w.r.t y, i.e. f'_y(x, y)
 
     return:  
         x_out (np.array): a numpy array of x values AFTER grad descent
@@ -349,12 +341,21 @@ def grad_descent_2(x, y, eta, iterations, function, grad_x, grad_y):
     x_out = np.zeros(iterations)
     y_out = np.zeros(iterations)
     f_out = np.zeros(iterations)
+    
     for i in range(iterations):
-        x = x - eta * grad_x(x)
-        y = y - eta * grad_y(y)
+        # 1. Calculate both gradients using the CURRENT x and y
+        current_grad_x = grad_x(x, y)
+        current_grad_y = grad_y(x, y)
+        
+        # 2. Update x and y using those calculated gradients
+        x = x - eta * current_grad_x
+        y = y - eta * current_grad_y
+        
+        # 3. Store the results
         x_out[i] = x
         y_out[i] = y
         f_out[i] = function(x, y)
+        
     print("Values of x are: ", x_out)
     print("Values of y are: ", y_out)
     print("Function results are: ", f_out)
@@ -475,7 +476,7 @@ def mse_depth_1(y_left, y_right):
     y_left and y_right are the second and fourth elements returned
     from split_data(data, threshold)
     """
-    print("Individual MSEs at depth 1: ")
+    print("Individual MSEs at depth 1 (left then right): ")
     # MSE for each region at depth 1
     mse_left = mse_node(y_left)
     mse_right = mse_node(y_right)
@@ -488,3 +489,42 @@ def mse_depth_1(y_left, y_right):
     mse_depth_1 = (n_left / n_total) * mse_left + (n_right / n_total) * mse_right
     print("MSE at depth 1 is: ", mse_depth_1)
     return mse_depth_1
+
+# def mse_tree(leaf_nodes):
+#     """
+#     Calculate the total weighted Mean Squared Error (MSE) for a decision tree of any depth.
+    
+#     param:
+#         leaf_nodes (list of np.array): A list containing the y-values for every final leaf node.
+#                                        e.g., [y_left, y_right] for depth 1
+#                                        e.g., [y_LL, y_LR, y_RL, y_RR] for depth 2
+#     return:
+#         float: The overall weighted MSE of the entire tree.
+#     """
+#     print(f"\nCalculating overall MSE for a tree with {len(leaf_nodes)} leaves...")
+    
+#     # Calculate total number of samples across all leaves
+#     n_total = sum(len(y) for y in leaf_nodes)
+    
+#     # Safety check: If there is no data at all, return 0
+#     if n_total == 0:
+#         return 0.0
+        
+#     weighted_mse_total = 0.0
+    
+#     for i, y in enumerate(leaf_nodes):
+#         # Skip empty nodes (if a split resulted in 0 data points on one side)
+#         if len(y) == 0:
+#             print(f"  -> Leaf {i+1} (n=0): Empty node, skipping.")
+#             continue
+            
+#         # Calculate MSE for this specific node
+#         node_mse = np.mean((y - np.mean(y)) ** 2)
+#         n_node = len(y)
+        
+#         # Add its weighted contribution to the total
+#         weighted_mse_total += (n_node / n_total) * node_mse
+#         print(f"  -> Leaf {i+1} (n={n_node}): Node MSE = {node_mse:.4f}")
+        
+#     print(f"Overall Tree MSE: {weighted_mse_total:.4f}")
+#     return weighted_mse_total
