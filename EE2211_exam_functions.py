@@ -187,7 +187,8 @@ def multi_category_classif(X, y, Xt):
     # one hot encode, find W
     encoder = OneHotEncoder(sparse_output=False)
     Ytr = encoder.fit_transform(y)
-    W = inv(X.T @ X) @ X.T @ Ytr
+    # The pseudoinverse safely handles both over- and under-determined systems
+    W = np.linalg.pinv(X) @ y
     print(f"W is: {W}")
 
     # predict y

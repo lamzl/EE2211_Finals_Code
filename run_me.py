@@ -6,7 +6,6 @@ Paste your ee2211_functions.py in the same directory, then run:
 """
 
 import numpy as np
-import math as math
 
 from EE2211_exam_functions import (
     bayes, check_rank, is_invertible,
@@ -56,13 +55,12 @@ print("\n" + "=" * 50)
 print("CHAPTER 6")
 print("=" * 50)
 
+# Training Data
+X_train_raw = np.array([[1, 3, -2], [-4, 0, -1], [3, 1, 8], [2, 1, 6], [8, 4, 6]])
+y_train = np.array([[1, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1], [0, 0, 1]])
 
-# X_train_raw = np.array([[1, 3, -2], [-4, 0, -1], [3, 1, 8], [2, 1, 6], [8, 4, 6]])
-X_train_raw = np.array([[4], [7], [10], [2], [3], [9]])
-y_train = np.array([-1, -1, -1, 1, 1, 1])
-X_test_raw = np.array([[4], [7], [10], [2], [3], [9]])
-# X_test_raw = np.array([[4], [7], [10], [2], [3], [9]])
-
+# Testing Data
+X_test_raw = np.array([[1, -2, 4]])
 # y_test = np.array([1, 1, 2, 3, 3])
 
 # --- add_bias() ---
@@ -73,9 +71,9 @@ print("X with bias column:\n", X_biased)
 
 # --- make_poly() ---
 print("\n-- make_poly() --")
-X_poly_train = make_poly(X_train_raw, order=4)
-X_poly_test  = make_poly(X_test_raw, order=4)
-print("Polynomial features (order 4):\n", X_poly_train)
+X_poly_train = make_poly(X_train_raw, order=3)
+X_poly_test  = make_poly(X_test_raw, order=3)
+print("Polynomial features (order 3):\n", X_poly_train)
 
 
 # --- mean_squared_error() ---
@@ -100,17 +98,29 @@ ridge_reg(X_biased, y_train, reg_factor=0.1, Xt=add_bias(X_test_raw))
 
 # --- binary_classif() ---
 print("\n-- binary_classif() --")
-y_binary = np.array([-1, -1, -1, 1, 1, 1])
+y_binary = np.array([1, 1, 2, 3, 3])
 # binary_classif(X_biased, y_binary, add_bias(X_test_raw))
 binary_classif(X_poly_train, y_binary, X_poly_test) # for polynomial features
 
 # --- multi_category_classif() ---
 print("\n-- multi_category_classif() --")
 X_mc = np.array([[1, 3, -2], [-4, 0, -1], [3, 1, 8], [2, 1, 6], [8, 4, 6]])
-y_mc = np.array([[1], [1], [2], [3], [3]])
-X_mc_b = add_bias(X_mc)
+y_mc = np.array([[1, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1], [0, 0, 1]])
+X_mc_b = add_bias(X_mc) 
 X_test_mc = add_bias(np.array([[1, -2, 4]]))
 multi_category_classif(X_mc_b, y_mc, X_test_mc)
+
+#==========================================
+print("\n-- multi_category_classif 2() --> polynomial --")
+X_mc = np.array([[1, 3, -2], [-4, 0, -1], [3, 1, 8], [2, 1, 6], [8, 4, 6]])
+y_mc = np.array([[1, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1], [0, 0, 1]]) 
+
+X_mc_poly = make_poly(X_mc, order=3)
+X_test_raw = np.array([[1, -2, 4]])
+X_test_poly = make_poly(X_test_raw, order=3)
+X_mc_final = add_bias(X_mc_poly)
+X_test_final = add_bias(X_test_poly)
+multi_category_classif(X_mc_final, y_mc, X_test_final)
 
 
 
@@ -149,21 +159,22 @@ print("\n" + "=" * 50)
 print("CHAPTER 8")
 print("=" * 50)
 
-# --- grad_descent() ---
+# --- grad_descent() 1 variable in C(w) ---
 print("\n-- grad_descent()--")
 x_val = 3.0
-f       = lambda x: math.sin(x)**2
-grad_f  = lambda x: 2 * math.sin(x) * math.cos(x)
+f       = lambda x: np.sin(x)**2
+grad_f  = lambda x: 2 * np.sin(x) * np.cos(x)
 gradient = grad_f(x_val)
 print(f"Calculated gradient at x={x_val:.4f} is: {gradient:.4f}")
+# eta is learning rate, iterations is number of steps to take
 grad_descent(x=x_val, eta=0.1, iterations=1, function=f, grad=grad_f)
 
-# --- grad_descent_2() ---
+# --- grad_descent_2() --> 2 variables in C(w) ---
 print("\n-- grad_descent_2() --")
-f2      = lambda x, y: x**2 + x*y**2
-grad_x2 = lambda x, y: 2 * x + y**2
-grad_y2 = lambda x, y: 2 * x * y
-grad_descent_2(x=3.0, y=2.0, eta=0.2, iterations=1,
+f2      = lambda x, y: np.e**(x-y)+ x**2*y
+grad_x2 = lambda x, y: np.e**(x-y) + 2*x*y # partial derivative w.r.t x
+grad_y2 = lambda x, y: -1*np.e**(x-y) + x**2 # partial derivative w.r.t y
+grad_descent_2(x=1.0, y=1.0, eta=0.2, iterations=1,
                function=f2, grad_x=grad_x2, grad_y=grad_y2)
 
 
