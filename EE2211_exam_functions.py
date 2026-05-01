@@ -488,44 +488,30 @@ def mse_depth_1(y_left, y_right):
     n_total = n_left + n_right
 
     mse_depth_1 = (n_left / n_total) * mse_left + (n_right / n_total) * mse_right
-    print("MSE at depth 1 is: ", mse_depth_1)
+    print("Overall MSE at depth 1 is: ", mse_depth_1)
     return mse_depth_1
 
-# def mse_tree(leaf_nodes):
-#     """
-#     Calculate the total weighted Mean Squared Error (MSE) for a decision tree of any depth.
-    
-#     param:
-#         leaf_nodes (list of np.array): A list containing the y-values for every final leaf node.
-#                                        e.g., [y_left, y_right] for depth 1
-#                                        e.g., [y_LL, y_LR, y_RL, y_RR] for depth 2
-#     return:
-#         float: The overall weighted MSE of the entire tree.
-#     """
-#     print(f"\nCalculating overall MSE for a tree with {len(leaf_nodes)} leaves...")
-    
-#     # Calculate total number of samples across all leaves
-#     n_total = sum(len(y) for y in leaf_nodes)
-    
-#     # Safety check: If there is no data at all, return 0
-#     if n_total == 0:
-#         return 0.0
+def k_means ( data_points , centers , n_clusters , max_iterations =100 ,tol =1e-4):
+    for _ in range ( max_iterations ):
+        # Assign each data point to the closest centroid
+        labels = np. argmin (np. linalg . norm ( data_points [:, np.newaxis] - centers , axis =2) , axis =1)
+
+        # Update centroids to be the mean of the data points assigned to them
+        new_centers = np. zeros (( n_clusters , data_points . shape [1]) )
+
+        # End if centroids no longer change
+        for i in range ( n_clusters ):
+            new_centers [i] = data_points [ labels == i]. mean ( axis =0)
+
+        if np. linalg . norm ( new_centers - centers ) < tol :
+            break
+
+        centers = new_centers
         
-#     weighted_mse_total = 0.0
-    
-#     for i, y in enumerate(leaf_nodes):
-#         # Skip empty nodes (if a split resulted in 0 data points on one side)
-#         if len(y) == 0:
-#             print(f"  -> Leaf {i+1} (n=0): Empty node, skipping.")
-#             continue
-            
-#         # Calculate MSE for this specific node
-#         node_mse = np.mean((y - np.mean(y)) ** 2)
-#         n_node = len(y)
-        
-#         # Add its weighted contribution to the total
-#         weighted_mse_total += (n_node / n_total) * node_mse
-#         print(f"  -> Leaf {i+1} (n={n_node}): Node MSE = {node_mse:.4f}")
-        
-#     print(f"Overall Tree MSE: {weighted_mse_total:.4f}")
-#     return weighted_mse_total
+    return centers , labels
+
+
+def sigmoid ( beta , a):
+    sigma = 1/(1+np.exp(-beta*a))
+
+    return sigma
