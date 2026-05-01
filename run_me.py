@@ -6,8 +6,7 @@ Paste your ee2211_functions.py in the same directory, then run:
 """
 
 import numpy as np
-import torch
-from torch import sigmoid
+
 
 from EE2211_exam_functions import (
     bayes, check_rank, is_invertible, k_means,
@@ -17,7 +16,7 @@ from EE2211_exam_functions import (
     pearsons, bias_squared, variance,
     grad_descent, grad_descent_2,
     gini_impurity, entropy, misclassification_rate,
-    overall_metric, split_data, mse_depth_1, mse_node
+    overall_metric, split_data, mse_depth_1, mse_node, sigmoid
 )
 
 # ===========================================================
