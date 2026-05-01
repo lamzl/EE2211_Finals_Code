@@ -511,7 +511,6 @@ def k_means ( data_points , centers , n_clusters , max_iterations =100 ,tol =1e-
     return centers , labels
 
 
-def sigmoid ( beta , a):
-    sigma = 1/(1+np.exp(-beta*a))
-
-    return sigma
+def sigmoid(x):
+    """Calculates the standard sigmoid activation."""
+    return 1 / (1 + np.exp(-x))

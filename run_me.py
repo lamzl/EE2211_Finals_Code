@@ -168,8 +168,8 @@ print("=" * 50)
 # --- grad_descent() 1 variable in C(w) ---
 print("\n-- grad_descent()--")
 x_val = 2.0
-f       = lambda x: x**4
-grad_f  = lambda x: 4*x**3
+f       = lambda x: np.sin(x)**2
+grad_f  = lambda x: 2*np.sin(x)*np.cos(x) 
 gradient = grad_f(x_val)
 print(f"Calculated gradient at x={x_val:.4f} is: {gradient:.4f}")
 # eta is learning rate, iterations is number of steps to take
@@ -270,33 +270,36 @@ print("\n" + "=" * 50)
 print("CHAPTER 12")
 print("=" * 50)
 
-print("\n-----implementing  sigmoid algorithm-----")
+print("\n-----implementing sigmoid algorithm (NumPy)-----")
 
-X = torch.tensor([[1 , 2 , 1],[1 , 5, 1]], dtype=torch.float32)
+X = np.array([[1, 2, 1], [1, 5, 1]])
 
-W1 = torch.tensor([[-1 , 0 , 1],[0 , -1, 0],[1, 0, -1]], dtype=torch.float32)
-W2 = torch.tensor([[-1 , 0 , 1],[0 , -1, 0],[1, 0, 1],[1, -1, 1]], dtype=torch.float32)
+W1 = np.array([[-1, 0, 1], [0, -1, 0], [1, 0, -1]])
+W2 = np.array([[-1, 0, 1], [0, -1, 0], [1, 0, 1], [1, -1, 1]])
 W3 = W2
-XW1 = X@W1
-#F_1 = 𝑓(𝑿𝑾_1 )
+
+XW1 = X @ W1
+
+# F_1 = 𝑓(𝑿𝑾_1)
 F_1 = sigmoid(XW1)
-print(F_1)
+print("F_1:\n", F_1)
 print('')
 
-#F_2 = 𝑓([𝟏,𝑓(𝑿𝑾_1 )] 𝑾_2 )
-bias = torch.ones((2, 1), dtype=torch.float32)
+# F_2 = 𝑓([𝟏, 𝑓(𝑿𝑾_1)] 𝑾_2)
+bias = np.ones((2, 1))
 
-F_2 = torch.cat([bias, F_1], dim=1)
-F_2 = F_2@W2
+# np.concatenate joins the bias column to the F_1 matrix along axis 1 (columns)
+F_2_input = np.concatenate((bias, F_1), axis=1) 
+F_2 = F_2_input @ W2
 F_2 = sigmoid(F_2)
-print(F_2)
+print("F_2:\n", F_2)
 print('')
 
-#F_3 = 𝑭_𝒘 (𝑿) = 𝑓([𝟏,𝑓([𝟏,𝑓(𝑿𝑾_1 )] 𝑾_2 )] 𝑾_3 )
-F_3 = torch.cat([bias, F_2], dim=1)
-F_3 = F_3@W3
+# F_3 = 𝑭_𝒘(𝑿) = 𝑓([𝟏, 𝑓([𝟏, 𝑓(𝑿𝑾_1)] 𝑾_2)] 𝑾_3)
+F_3_input = np.concatenate((bias, F_2), axis=1)
+F_3 = F_3_input @ W3
 F_3 = sigmoid(F_3)
-print(F_3)
+print("F_3:\n", F_3)
 
 
 
